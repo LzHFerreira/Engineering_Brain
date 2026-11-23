@@ -18,6 +18,6 @@ clang-format --dry-run -Werror "${c[@]}"
 san="-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
 cmake -S . -B build/test -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 CC=clang cmake -S . -B build/sanitize -G Ninja -DCMAKE_C_FLAGS="$san"
-for b in test sanitize; do cmake --build build/$b && ctest --test-dir build/$b --output-on-failure --no-tests=error; done
+for b in test sanitize; do cmake --build build/$b; ctest --test-dir build/$b --output-on-failure --no-tests=error; done
 clang-tidy -p build/test --checks='clang-analyzer-*,bugprone-*' --warnings-as-errors='*' modules/kvc/src/kv.c
 [ "$1" != deep ] || { echo "UNAVAILABLE: mutation gate" >&2; exit 1; }
