@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Dispatch verification to native tools; fail closed when no gate applies.
+set -euo pipefail
+case "${1:-}" in
+  fast | pr | deep) ;;
+  *) echo "usage: scripts/verify fast|pr|deep" >&2; exit 2 ;;
+esac
+echo "UNAVAILABLE: no language gates configured" >&2
+exit 1
