@@ -8,4 +8,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      - run: sudo apt-get install -y ninja-build clang-tidy clang-format
       - run: scripts/verify pr
