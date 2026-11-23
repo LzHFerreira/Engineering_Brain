@@ -5,5 +5,12 @@ case "${1:-}" in
   fast | pr | deep) ;;
   *) echo "usage: scripts/verify fast|pr|deep" >&2; exit 2 ;;
 esac
-echo "UNAVAILABLE: no language gates configured" >&2
-exit 1
+cd "$(dirname "$0")/.."
+src=modules/kv/src
+uvx ruff@0.17.6 check modules
+uvx ruff@0.17.6 format --check modules
+uvx mypy@2.4.1 --strict "$src"
+uvx pyright@1.1.414 "$src"
+uvx --with hypothesis==6.170.17 pytest@9.2.0 -q --strict-markers \
+  -o strict_xfail=true -o pythonpath="$src" modules/kv/tests
+[ "$1" != deep ] || { echo "UNAVAILABLE: mutation gate" >&2; exit 1; }
