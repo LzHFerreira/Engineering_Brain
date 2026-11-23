@@ -40,7 +40,7 @@ Assemble one package per task with the objective, acceptance criteria, module co
 
 ## Testing contract
 
-Every code change records its starting Git state and pre-existing failures, verifies intended behavior, runs applicable build and static checks, checks affected contracts and focused regressions, validates architecture rules, compares the actual diff with authorized scope, and records commands, exit codes, failures, and the code fingerprint tested. A proposed single command such as `make verify` should run existing tools, not replace their test runner. Record why a gate is inapplicable or unavailable.
+Every code change records its starting Git state and pre-existing failures, verifies intended behavior, runs applicable build and static checks, checks affected contracts and focused regressions, validates architecture rules, compares the actual diff with authorized scope, and records commands, exit codes, failures, and the code fingerprint tested. The single command `scripts/verify` (see `TESTING.md`) must run existing tools, not replace their test runner. Record why a gate is inapplicable or unavailable.
 
 Expected behavior and critical test outcomes come from the approved contract independently of the implementation. Use RED → GREEN → REFACTOR for new or changed testable behavior. Require review for changes to critical assertions, fixtures, or golden results. Use targeted mutation testing or fault injection for critical invariants and important regression fixes.
 

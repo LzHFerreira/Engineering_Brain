@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Dispatch verification to native tools; fail closed when no gate applies.
+set -euo pipefail
+case "${1:-}" in
+  fast | pr | deep) ;;
+  *) echo "usage: scripts/verify fast|pr|deep" >&2; exit 2 ;;
+esac
+cd "$(dirname "$0")/.."
+src=modules/kv/src
+uvx ruff@0.17.6 check modules
+uvx ruff@0.17.6 format --check modules
+uvx mypy@2.4.1 --strict "$src"
+uvx pyright@1.1.414 "$src"
+uvx --with hypothesis==6.170.17 pytest@9.2.0 -q --strict-markers \
+  -o strict_xfail=true -o pythonpath="$src" modules/kv/tests
+c=(modules/kvc/src/kv.c modules/kvc/src/kv.h modules/kvc/tests/test_kv.c)
+clang-format --dry-run -Werror "${c[@]}"
+san="-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+cmake -S . -B build/test -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+CC=clang cmake -S . -B build/sanitize -G Ninja -DCMAKE_C_FLAGS="$san"
+for b in test sanitize; do cmake --build build/$b; ctest --test-dir build/$b --output-on-failure --no-tests=error; done
+clang-tidy -p build/test --checks='clang-analyzer-*,bugprone-*' --warnings-as-errors='*' modules/kvc/src/kv.c
+[ "$1" != deep ] || { echo "UNAVAILABLE: mutation gate" >&2; exit 1; }
